@@ -5,20 +5,18 @@ const httpserver = require('http').createServer(app);
 const topic_model = require('./models/topicschema');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-
+const controller = require('./Samplecontroller');
 const socket = require('socket.io')(httpserver);
 
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 //process.env.MONGO_URL/////mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority
-mongoose.connect(
-    'mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority'
+mongoose.connect(process.env.MONGO_URL
 
     , {
         useUnifiedTopology: true,
         useNewUrlParser: true,
-
     });
 
 
@@ -64,35 +62,48 @@ app.post('/save', async (req, res) => {
 
     const { tit, code } = req.body;
     try {
-  const saved_topic = await topic_model.create({
+        const saved_topic = await topic_model.create({
 
             title: tit, Code: code
 
         });
 
         res.status(200).json({
-status:'success',
-data:saved_topic
+            status: 'success',
+            data: saved_topic
 
         })
 
-    }catch(err){
+    } catch (err) {
 
         res.status(200).json({
-            status:'error'
-            
-                    })
-            
+            status: 'error'
+
+        })
+
     }
-         
+
 
 })
 
-app.get('/getall',async(req,res)=>{
+app.get('/getall', async (req, res) => {
 
-const response = await topic_model.find();
+    try {
 
-console.log(response);
+        const resp = controller.gettopics();
+
+        res.status(200).json({
+            status: 'success',
+            data: resp
+
+        })
+    } catch (err) {
+
+        res.status(200).json({
+            status: 'error'
+
+        })
+    }
 
 })
 
