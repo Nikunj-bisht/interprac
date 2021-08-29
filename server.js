@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const controller = require('./Samplecontroller');
 const socket = require('socket.io')(httpserver);
-
+const { Rooms } = require('./Allroms');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGO_URL
         useUnifiedTopology: true,
         useNewUrlParser: true,
     });
-
+const rooms = new Rooms();
 
 socket.on('connect', (soc) => {
 
@@ -29,15 +29,13 @@ socket.on('connect', (soc) => {
         const { room_name } = user_data;
         console.log(user_data);
         soc.join(room_name);
-        soc.to(room_name).emit("added", "yo");
+        const mem = rooms.getmembers(room_name);
+        socket.sockets.in(room_name).emit("members", mem);
+        // soc.to(room_name).emit("added", mem);
 
 
     });
 
-    soc.on('join', (user_data) => {
-        const { room_name } = user_data;
-        soc.join(room_name);
-    });
 
 
 });
@@ -60,17 +58,13 @@ app.get('/joinroom', (req, res) => {
 
 app.post('/save', async (req, res) => {
 
-    const { tit, code } = req.body;
     try {
-        const saved_topic = await topic_model.create({
+        const { tit, code } = req.body;
 
-            title: tit, Code: code
-
-        });
-
+        const response = controller.savetopic(tit, code);
         res.status(200).json({
             status: 'success',
-            data: saved_topic
+            data: response
 
         })
 
@@ -90,13 +84,13 @@ app.get('/getall', async (req, res) => {
 
     try {
 
-        const resp = controller.gettopics();
-
+        const resp = await controller.gettopics();
+        console.log(resp);
         res.status(200).json({
             status: 'success',
             data: resp
 
-        })
+        });
     } catch (err) {
 
         res.status(200).json({

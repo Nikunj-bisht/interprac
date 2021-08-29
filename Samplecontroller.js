@@ -12,3 +12,16 @@ return response;
 
 
 }
+
+exports.savetopic = async(tit , code)=>{
+
+
+    const saved_topic = await topic_model.create({
+
+        title: tit, Code: code
+
+    });
+
+    return saved_topic;
+
+}
