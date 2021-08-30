@@ -17,7 +17,7 @@ e.preventDefault();
 localStorage.setItem('name',name);
 localStorage.setItem('rname',room_name);
 
-window.open("http://localhost:3000/joinroom");
+window.open("https://interprac.herokuapp.com/joinroom");
 //"http://localhost:3000/joinroom"
 //"https://drawersoc.herokuapp.com/joinroom"
 });
@@ -40,7 +40,7 @@ e.preventDefault();
 localStorage.setItem('name',name);
 localStorage.setItem('rname',room_name);
 
-window.open("http://localhost:3000/joinroom");
+window.open("https://interprac.herokuapp.com/joinroom");
 
 
 
