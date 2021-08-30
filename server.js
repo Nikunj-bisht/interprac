@@ -43,7 +43,12 @@ socket.on('connect', (soc) => {
 
     });
 
+soc.on("mssg",(message)=>{
+    socket.sockets.in(room_name).emit("getmsg", message);
 
+
+
+})
 
 });
 
