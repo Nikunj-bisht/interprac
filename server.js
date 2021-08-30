@@ -44,7 +44,7 @@ socket.on('connect', (soc) => {
     });
 
 soc.on("mssg",(message)=>{
-    socket.sockets.in(room_name).emit("getmsg", message);
+    socket.sockets.in("1234").emit("getmsg", message);
 
 
 
