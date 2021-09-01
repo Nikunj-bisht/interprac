@@ -19,6 +19,9 @@ getmembers(room_name){
     return this.rooms.get(room_name).members;
 }
 
+dec_counter(room_name){
+this.rooms.get(room_name).members-=1;
+}
 
 }
 

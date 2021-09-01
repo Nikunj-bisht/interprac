@@ -43,10 +43,23 @@ socket.on('connect', (soc) => {
 
     });
 
-soc.on("mssg",(message)=>{
-    socket.sockets.in("1234").emit("getmsg", message);
+soc.on("mssg",(message_pack)=>{
+const {room_name , message , user_name} = message_pack;
+    socket.sockets.in(room_name).emit("getmsg", {mess:message,user:user_name});
+
+});
+
+soc.on("type",(room_name)=>{
+
+    socket.sockets.in(room_name).emit("typing", "--");
 
 
+})
+
+
+soc.on('disconnect',(room_name)=>{
+
+rooms.dec_counter(room_name);
 
 })
 
