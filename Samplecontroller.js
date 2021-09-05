@@ -1,6 +1,6 @@
 
 const topic_model = require('./models/topicschema');
-
+console.log(topic_model);
 
 exports.gettopics = async()=>{
 

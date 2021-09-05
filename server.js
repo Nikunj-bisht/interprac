@@ -60,7 +60,7 @@ soc.on("type",(room_name)=>{
 soc.on('disconnect',(room_name)=>{
 
 rooms.dec_counter(room_name);
-
+console.log("removed",soc.id);
 })
 
 });

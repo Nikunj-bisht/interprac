@@ -7,6 +7,8 @@ constructor(){
 this.rooms = new Map();
 }
 
+
+
 addnewroom(room_name){
 if(this.rooms.has(room_name)){
 this.rooms.get(room_name).members+=1;
@@ -20,8 +22,9 @@ getmembers(room_name){
 }
 
 dec_counter(room_name){
-this.rooms.get(room_name).members-=1;
-}
+    if(this.rooms.has(room_name)){
+        this.rooms.get(room_name).members-=1;
+        }}
 
 }
 
