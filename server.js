@@ -6,6 +6,9 @@ const topic_model = require('./models/topicschema');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const controller = require('./Samplecontroller');
+const df = require('dialogflow-fulfillment')
+
+
 const socket = require('socket.io')(httpserver, {
 
     cors: {
@@ -18,8 +21,7 @@ const { Rooms } = require('./Allroms');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 //process.env.MONGO_URL/////mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority
-mongoose.connect(
-    process.env.MONGO_URL
+mongoose.connect('mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority'
     , {
         useUnifiedTopology: true,
         useNewUrlParser: true,
@@ -124,6 +126,31 @@ app.get('/getall', async (req, res) => {
         })
     }
 
+})
+
+
+app.post('/getsearch',async(req,res)=>{
+
+    try{
+
+        const {typed} = req.body;
+        const searched_room =  await controller.findroom(typed);
+        res.status(200).json({
+            status:"success",
+            rooms:searched_room
+        });
+    }catch(err){
+        res.status(200).json({
+            status:"error"
+        });
+    }
+
+    
+})
+
+
+app.post('/',(req,res)=>{
+    
 })
 
 
