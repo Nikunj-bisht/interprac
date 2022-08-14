@@ -64,16 +64,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
     integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
-     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script defer>
 
   
-var io = io.connect(window.location.host);
+var io = io.connect("http://localhost:3000");
 
 // for joining user
 
 io.emit('create', { user_name , room_name });
-
+io.on("yo",()=>{console.log('hi')})
 
 
 

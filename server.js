@@ -7,16 +7,30 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const controller = require('./Samplecontroller');
 const df = require('dialogflow-fulfillment')
+const { Rooms } = require('./Allroms');
+const { count } = require('console');
+
+const chatRooms = new Rooms();
+const gdRooms = new Rooms();
 
 
-const socket = require('socket.io')(httpserver, {
-
+const socket = require('socket.io')(httpserver,{path:'/chat'}, {
+    // https://interprac.herokuapp.com/
     cors: {
-            origin: "https://interprac.herokuapp.com/",
+            origin: "https://interprac.herokuapp.com",
             method: ["GET", "POST"]
           }
     });
-const { Rooms } = require('./Allroms');
+
+    const gdsocket = require('socket.io')(httpserver,{path:'/gd'}, {
+        // https://interprac.herokuapp.com/
+        cors: {
+                origin: "https://interprac.herokuapp.com",
+                method: ["GET", "POST"]
+              }
+        });
+    
+    
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,24 +39,52 @@ mongoose.connect('mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.n
     , {
         useUnifiedTopology: true,
         useNewUrlParser: true,
+    }).then((res)=>{
+        console.log('connected to db');
     });
-const rooms = new Rooms();
 
-socket.on('connect', (soc) => {
-
-    console.log("new socket ");
-
+gdsocket.on('connect',(soc)=>{
+    console.log('gd')
     soc.on('create', (user_data) => {
-
         const { room_name } = user_data;
         console.log(user_data);
-        rooms.addnewroom(room_name);
+        gdRooms.addnewroom(room_name);
         soc.join(room_name);
-        const mem = rooms.getmembers(room_name);
+        const mem = gdRooms.getmembers(room_name);
+        // socket.sockets.in(room_name).emit("members", mem);
+        // soc.to(room_name).emit("added", mem);   
+    });
+
+    soc.on('start',({room_name,countTimer})=>{
+          //   let id =  setInterval(()=>{
+        // soc.broadcast.to(room_name).emit("count",countTimer);
+        //  gdsocket.sockets.in(room_name).emit("count", countTimer);
+         gdsocket.sockets.in(room_name).emit("count", countTimer);
+    //     if(init <= 0){
+    //         console.log('stop')
+    //         clearInterval(id)
+    //     }
+    //    },1000);
+       
+    })
+
+    soc.on('showimage',({room_name})=>{
+        gdsocket.sockets.in(room_name).emit("image","Started");
+    })
+
+
+})
+
+socket.on('connect', (soc) => {
+    console.log("connected")
+    soc.on('create', (user_data) => {
+        const { room_name } = user_data;
+        console.log(user_data);
+        chatRooms.addnewroom(room_name);
+        soc.join(room_name);
+        const mem = chatRooms.getmembers(room_name);
         socket.sockets.in(room_name).emit("members", mem);
         // soc.to(room_name).emit("added", mem);
-
-
     });
 
 soc.on("mssg",(message_pack)=>{
@@ -61,7 +103,7 @@ soc.on("type",(room_name)=>{
 
 soc.on('disconnect',(room_name)=>{
 
-rooms.dec_counter(room_name);
+chatRooms.dec_counter(room_name);
 console.log("removed",soc.id);
 })
 
@@ -106,6 +148,8 @@ app.post('/save', async (req, res) => {
 
 
 })
+
+
 
 app.get('/getall', async (req, res) => {
 

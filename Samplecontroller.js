@@ -2,26 +2,26 @@
 const topic_model = require('./models/topicschema');
 console.log(topic_model);
 
-exports.gettopics = async()=>{
+exports.gettopics = async () => {
 
 
-const response = await topic_model.find();
+    const response = await topic_model.find();
 
-return response;
+    return response;
 
-
-
-}
-
-exports.findroom = async(room)=>{
-
-const rooms = await topic_model.find({title:room});
-return rooms;
 
 
 }
 
-exports.savetopic = async(tit , code)=>{
+exports.findroom = async (room) => {
+
+    const rooms = await topic_model.find({ title: room });
+    return rooms;
+
+
+}
+
+exports.savetopic = async (tit, code) => {
 
 
     const saved_topic = await topic_model.create({
