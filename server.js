@@ -5,10 +5,32 @@ const httpserver = require('http').createServer(app);
 const topic_model = require('./models/topicschema');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const controller = require('./Samplecontroller');
+const controller = require('./controller/Samplecontroller');
+const PpdtController = require('./controller/PpdtController');
 const df = require('dialogflow-fulfillment')
 const { Rooms } = require('./Allroms');
 const { count } = require('console');
+const Grid = require('gridfs-stream');
+const multer = require('multer');
+const upload = multer();
+const PpdtRoute = require('./router/ppdtrouter');
+const GridFsStorage = require('multer-gridfs-storage').GridFsStorage;
+
+const uploadimg = multer({
+    storage: new GridFsStorage({
+        url:'mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority',
+        option:{ useUnifiedTopology: true,
+            useNewUrlParser: true,},
+        file:(req,file)=>{
+console.log(file,'fi')
+            return {
+                bucketName: "photos",
+                fileName: `${file.originalname}`
+            }
+        },
+
+    })
+})
 
 const chatRooms = new Rooms();
 const gdRooms = new Rooms();
@@ -33,7 +55,8 @@ const socket = require('socket.io')(httpserver,{path:'/chat'}, {
     
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true }));
+app.use(upload.any());
 //process.env.MONGO_URL/////mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority
 mongoose.connect('mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.net/authusers?retryWrites=true&w=majority'
     , {
@@ -42,6 +65,13 @@ mongoose.connect('mongodb+srv://nicola:qObaF401D1ej4Vj4@cluster0.3uhra.mongodb.n
     }).then((res)=>{
         console.log('connected to db');
     });
+
+const connection = mongoose.connection;
+let gfs;
+connection.once("open",()=>{
+    gfs = Grid(connection.db,mongoose.mongo);
+    gfs.collection("photos")
+})
 
 gdsocket.on('connect',(soc)=>{
     console.log('gd')
@@ -56,21 +86,18 @@ gdsocket.on('connect',(soc)=>{
     });
 
     soc.on('start',({room_name,countTimer})=>{
-          //   let id =  setInterval(()=>{
-        // soc.broadcast.to(room_name).emit("count",countTimer);
-        //  gdsocket.sockets.in(room_name).emit("count", countTimer);
          gdsocket.sockets.in(room_name).emit("count", countTimer);
-    //     if(init <= 0){
-    //         console.log('stop')
-    //         clearInterval(id)
-    //     }
-    //    },1000);
        
     })
 
     soc.on('showimage',({room_name})=>{
         gdsocket.sockets.in(room_name).emit("image","Started");
     })
+    
+    soc.on("message",({room_name,message})=>{
+        gdsocket.sockets.in(room_name).emit("onReceive",message);
+
+    });
 
 
 })
@@ -149,6 +176,23 @@ app.post('/save', async (req, res) => {
 
 })
 
+app.use('/create-ppdt',async(req,res)=>{
+
+    uploadimg.single("file");
+  await  PpdtController.createPpdtRoom(req,res);
+res.send("op")
+
+})
+app.get("/file/:filename", async (req, res) => {
+    try {
+        const file = await gfs.files.findOne({ filename: req.params.filename });
+        const readStream = gfs.createReadStream(file.filename);
+        readStream.pipe(res);
+    } catch (error) {
+        console.log(error)
+        res.send("not found");
+    }
+});
 
 
 app.get('/getall', async (req, res) => {
