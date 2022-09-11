@@ -98,6 +98,10 @@ gdsocket.on('connect',(soc)=>{
         gdsocket.sockets.in(room_name).emit("onReceive",message);
 
     });
+    soc.on("audio",({room_name,audioUrl})=>{
+
+       gdsocket.sockets.in(room_name).emit("audioFile",audioUrl);
+    })
 
 
 })
